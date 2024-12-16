@@ -1,0 +1,310 @@
+---
+title: "ADRC Participant Access Request"
+output: 
+  html_document:
+    mathjax: null
+  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+suppressPackageStartupMessages({
+  library(targets)
+  library(magrittr)
+  library(kableExtra)
+  library(pander)
+  library(flextable)
+  library(knitr)
+})
+
+R.utils::sourceDirectory(paste0(getwd()), modifiedOnly = FALSE)
+
+id_curr <- 31
+
+.dat <- redcap_read_in()
+.out <- build_survey_tables(.dat, .id = id_curr)
+.dat_curr <- .dat[.dat$record_id == id_curr,]
+
+```
+<br>  
+
+# Access Request Goal
+```{r echo=FALSE, results='asis'}
+.var <- "goal"
+
+
+#Standard empty list catch
+if(!is.list(.out[[.var]][["form"]])){
+  cat(paste0("<h3> ", .out[[.var]][["form"]], "</h3> <br>  "))
+  
+} else{
+  #Uses the standard long form build, we know it will always exist so we can just go straight to the for loop
+  for(ii in seq_along(.out[[.var]][["form"]][["names"]])){
+    
+      #Print the name and form on a single line
+      cat(paste0("<h3>", .out[[.var]][["form"]][["names"]][ii], " - ", .out[[.var]][["form"]][["string"]][ii], "</h3>  "))
+  }
+}
+```
+<br>  
+
+# Principal Investigator
+```{r echo=FALSE, results='asis'}
+.out[["pi"]]$kable
+```
+
+
+```{r echo=FALSE, results='asis'}
+
+if(!is.null(.out[["copi"]]$kable)){
+  cat("<h1> Co-PI</h1>")
+  .out[["copi"]]$kable
+} else{
+  cat("<h3> No Co-PI listed in survey  </h3><br>")
+}
+
+```
+
+<br>
+
+<!--- Hypothesis and Aims Details --->
+<h1 style="page-break-before: always;">Study and Theme Details</h1>
+```{r echo=FALSE, results='asis'}
+.var <- "details"
+
+#Stock long-form process, first check if the details entry is blank, otherwise print the appropriate output
+if(!is.list(.out[[.var]][["form"]])){
+  cat(paste0("<h3> ", .out[[.var]][["form"]], "</h3> <br>  "))
+  
+} else{
+  #Iterate over the length of the list entry
+  for(ii in seq_along(.out[[.var]][["form"]][["names"]])){
+    
+    #Print the name
+    cat(paste0("<h2>", .out[[.var]][["form"]][["names"]][ii], "</h2>  "))
+
+    #Print the form entry
+    cat(paste0("<p style=\"font-size: 18px\"><span>", .out[[.var]][["form"]][["string"]][ii], "</span></p><br>  "))
+  }
+}
+
+#We also include the theme here - may generalize later since it might be applicable to other portions
+if(!is.list(.out[["theme"]][["form"]])){
+  cat(paste0("<h3>ADRC Deep South disparities theme not detailed in survey</h3> <br>  "))
+} else{
+  cat(paste0("<h2>", .out[["theme"]][["form"]][["string"]][1], "</h2>  "))
+  #Check if theme details exist by virtue of the string list being longer than length 1 and print details accordingly
+  if(length(.out[["theme"]][["form"]][["string"]]) > 1) {
+    cat(paste0("<p style=\"font-size: 18px\"><span>", .out[["theme"]][["form"]][["string"]][2], "</span></p><br>  "))
+  }
+}
+
+```
+
+
+<br>
+
+<!--- Funding --->
+<h1 style="page-break-before: always;">Funding and IRB Details</h1>
+```{r echo=FALSE, results='asis'}
+.var <- "funding"
+
+#Stock long-form process, first check if the details entry is blank, otherwise print the appropriate output
+if(!is.list(.out[[.var]][["form"]])){
+  cat(paste0("<h3> ", .out[[.var]][["form"]], "</h3> <br>  "))
+  
+} else{
+  #Iterate over the length of the list entry
+  for(ii in seq_along(.out[[.var]][["form"]][["names"]])){
+    
+    #Print the name and form on a single line
+    cat(paste0("<h3>", .out[[.var]][["form"]][["names"]][ii], " - ", .out[[.var]][["form"]][["string"]][ii], "</h2>  "))
+  }
+}
+
+```
+
+<br>
+
+
+
+<!--- Sample Size --->
+<h1 style="page-break-before: always;">Subject Sample Size and Profile</h1>
+```{r echo=FALSE, results='asis'}
+
+#First build the sample size table
+if(!is.null(.out[["sample_size"]]$kable)){
+  cat("<h2> Sample size by cognitive ability</h2>")
+  #Bold the last row if needed
+  .total_toggle <- TRUE
+  if(.out[["sample_size"]]$dat$md[nrow(.out[["sample_size"]]$dat)] != "Total N") .total_toggle <- FALSE
+  kableExtra::row_spec(.out[["sample_size"]]$kable, nrow(.out[["sample_size"]]$dat), bold = .total_toggle)
+} else{
+  cat("<h3> Sample sizes not detailed  </h3><br>")
+}
+
+#Print additional inclusion/exclusion if necessary
+if(!is.null(.out[["sample_size"]]$extra)){
+  cat("<h3>Additional inclusion/exclusion details</h3>")
+  cat(paste0("<p style=\"font-size: 18px\"><span>", gsub("\\n", "<br>  ", .out[["sample_size"]]$extra), "</span></p><br>  "))
+}
+
+.var <- "minorities"
+
+#Print the long form for minorities and stratification
+cat("<h2>Racial minorities and other stratifcation")
+if(!is.list(.out[[.var]][["form"]])){
+  cat(paste0("<h3> ", .out[[.var]][["form"]], "</h3> <br>  "))
+  
+  #Print racial disparities toggle
+} else{
+  if(!("Disparities" %in% .out[[.var]][["form"]][["names"]])){ cat("<h3>Racial disparities not indicated in survey</h3>")
+  } else{
+    cat(paste0("<h3>", .out[[.var]][["form"]][["string"]][which(.out[[.var]][["form"]][["names"]] == "Disparities")], "</h2>  "))
+  }
+  
+  #Finally print stratification details if they exist
+  if("Stratification" %in% .out[[.var]][["form"]][["names"]]){ 
+    cat("<h3>Additional stratification details</h3>")
+    cat(paste0("<p style=\"font-size: 18px\"><span>", 
+               .out[[.var]][["form"]][["string"]][which(.out[[.var]][["form"]][["names"]] == "Stratification")], "</span></p><br>"))
+  }
+  
+}
+  
+
+
+
+```
+
+<br>
+
+<h1 style="page-break-before: always;">Requested Resources</h1>
+
+```{r, echo=FALSE, results='asis'}
+
+.break_track <- 0
+
+#First up, the exisiting data
+
+.var <- "data_var"
+
+if(!is.null(.out[[.var]]$kable)){
+  cat("<h2>Existing data</h2>")
+  cat(kableExtra::kable_styling(.out[[.var]]$kable, font_size=18, full_width=F, position = "left"))
+  .break_track <- .break_track + 1
+}
+  
+if(!is.null(.out[[.var]]$extra) && !is.na(.out[[.var]]$extra)){
+  cat("<h3>Additional data comments</h3>")
+  cat(paste0("<p style=\"font-size: 18px\"><span>", gsub("\\n", "<br>", .out[[.var]]$extra), "</span></p><br>  "))
+}
+
+
+#Next, human subject details
+
+.var <- "human_subj"
+
+#Stock long-form process, first check if the details entry is blank, otherwise print the appropriate output
+if(is.null(dim(.out[[.var]][["dat"]])) && length(.out[[.var]][["dat"]]) > 0){
+  
+  cat("<h2>Human subject involvement</h2>")
+  
+  .break_track <- .break_track + 1
+  
+  #Iterate over the length of the list entry
+  for(ii in seq_along(.out[[.var]][["form"]][["names"]])){
+    
+    #Print the name
+    cat(paste0("<h3>", .out[[.var]][["form"]][["names"]][ii], "</h3>  "))
+
+    #Print the form entry
+    cat(paste0("<p style=\"font-size: 18px\"><span>", .out[[.var]][["form"]][["string"]][ii], "</span></p>"))
+  }
+  
+  #A special catch for compensation
+  if(!("Compensation" %in% .out[[.var]][["form"]][["names"]])){
+    cat("<h3>No compensation listed in survey</h3>")
+  }
+}
+
+```
+
+```{r, echo=FALSE, results='asis'}
+
+.var <- "biospec"
+
+#Finally, biospecimens; first we check if we should even proceed
+
+if(!is.null(.out[[.var]])){
+  
+  #Check if we add a page break
+  if(.break_track > 0) {h2_head <- "<h2 style=\"page-break-before: always\">"
+  } else h2_head <- "<h2>"
+  
+  cat(paste0(h2_head, "Banked biospecimen</h2>"))
+
+  #Since this returns a list, we step through it one section at at a time
+  invisible(lapply(.out[[.var]], function(.bio){
+  
+    #First check if the kable exists
+    if(!is.null(.bio$kable)){
+    
+      #Print the name
+      cat(paste0("<h3>", .bio$name, "</h3>"))
+      
+      #Print the kable
+      cat(.bio$kable)
+    
+    }
+  
+    return(NULL)
+  
+  }))
+  
+}
+
+
+
+```
+
+
+# Statistical support
+```{r, echo=FALSE, results='asis'}
+
+#This is unique enough we just hard code it
+.var <- "stats"
+
+#Default message if value is missing
+if(!is.list(.out[[.var]][["form"]])){
+  cat(paste0("<h3>", .out[[.var]][["form"]], "</h3>"))
+
+#Otherwise, print the single output or combined string, this could be handled by a new "added_var" arguemnt to long_form_builder but it's not worth the current effort
+} else{
+  string_curr <- .out[[.var]][["form"]][["string"]][["partacc_stat"]]
+  if("partacc_stat_name" %in% names(.out[[.var]][["form"]][["string"]]) &&
+     !is.null(.out[[.var]][["form"]][["string"]][["partacc_stat_name"]])){
+    string_curr <- paste0(string_curr, " - ", .out[[.var]][["form"]][["string"]][["partacc_stat_name"]])
+  }
+  cat(paste0("<h3>", string_curr, "</h3>"))
+}
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
