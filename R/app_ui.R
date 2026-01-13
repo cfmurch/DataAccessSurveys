@@ -100,3 +100,4 @@ golem_add_external_resources <- function(){
     shinybrowser::detect()
   )
 }
+

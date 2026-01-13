@@ -1,0 +1,41 @@
+# R-specific files
+.Rhistory
+.Rproj.user
+.RData
+.Ruserdata
+*.Rproj
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+*.Rmd
+README*
+LICENSE
+CODE_OF_CONDUCT.md
+NEWS.md
+
+# Development files
+dev/
+tests/
+man/
+
+# Output files (will be created in container)
+output/*.pdf
+output/*.html
+*.pdf
+*.png
+*.csv
+*.txt
+
+# Connect deployment
+rsconnect/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -16,7 +16,20 @@ Imports:
     processx,
     R.utils,
     redcapAPI,
-    shiny (>= 1.6.0)
+    shiny (>= 1.6.0),
+    waiter,
+    pkgload,
+    callr,
+    desc,
+    pkgbuild,
+    targets,
+    shinybrowser,
+    pagedown,
+    bs4Dash,
+    rmarkdown,
+    httr,
+    pander,
+    flextable
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.1
