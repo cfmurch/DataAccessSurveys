@@ -43,7 +43,11 @@ app_server <- function(input, output, session) {
     #Paths and pagedown
     html_path <- paste0(out_dir, "/survey_template.html")
     pdf_path <- paste0(out_dir, "/survey_template.pdf")
-    pagedown::chrome_print(input = html_path, output = pdf_path)
+    # options(chromote.timeout = 60)
+    # 
+    # pagedown::chrome_print(input = html_path, output = pdf_path)
+    wkhtml_cmd <- sprintf("wkhtmltopdf %s %s", shQuote(html_path), shQuote(pdf_path))
+    system(wkhtml_cmd)
 
     # Provide the PDF for download
     showNotification("PDF generated! You can now download it.", type = "message")

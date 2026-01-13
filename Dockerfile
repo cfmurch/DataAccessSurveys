@@ -3,6 +3,7 @@ FROM rocker/shiny:4.4.1
 # -----------------------------
 # Install system dependencies
 # -----------------------------
+
 RUN apt-get update && apt-get install -y \
     build-essential \
     g++ \
@@ -26,8 +27,12 @@ RUN apt-get update && apt-get install -y \
     libtool \
     libc-dev \
     libgomp1 \
+    wget \
+    gnupg \
+    ca-certificates \
+    fonts-liberation \
+    wkhtmltopdf \
     && rm -rf /var/lib/apt/lists/*
-
 
 # -----------------------------
 # Enable renv cache
